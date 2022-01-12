@@ -1,6 +1,6 @@
 ######################################################################################################################################
 # Imports
-from flask import Flask, render_template, Response , request
+from flask import Flask, render_template, Response , request ,send_from_directory
 import cv2
 import mediapipe as mp
 import torch
@@ -11,6 +11,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import datasets, transforms ,models
 import torch.optim as optim
+import os
+import time
 #####################################################################################################################################
 # Initiate some variables
 app = Flask(__name__)
@@ -43,7 +45,8 @@ class ModeL(nn.Module):
 ######################################################################################################################################
 # Your transformation
 transform= transforms.Compose([transforms.ToTensor(),
-                                    transforms.Normalize((0.5694, 0.4460, 0.3912), (0.2734, 0.2435, 0.2370))
+                                transforms.Resize((224,224)),
+                                transforms.Normalize((0.5694, 0.4460, 0.3912), (0.2734, 0.2435, 0.2370))
                                                             ])
 #####################################################################################################################################
 # create and load the model
@@ -56,7 +59,6 @@ model.eval()
 # Function to predect the emotion
 def img_ER (img,num_of_emos = 4):
     img = cv2.cvtColor(img , cv2.COLOR_BGR2RGB)
-    img = cv2.resize(img,(224,224))
     inputs = transform(img)
 
     final_image = torch.unsqueeze(inputs, 0)
@@ -89,11 +91,15 @@ def img_ER (img,num_of_emos = 4):
 ######################################################################################################################################
 # Flask function
 def gen_frames(num_of_emos):  
-
-    with mp_face_detection.FaceDetection(model_selection=0,min_detection_confidence=0.5) as face_detection:
+    pTime = 0
+    with mp_face_detection.FaceDetection(model_selection=0,min_detection_confidence=0.8) as face_detection:
         
         while True:
             success, image = camera.read()  # read the camera frame
+            cTime = time.time()
+            fps = 1/(cTime - pTime)
+            pTime = cTime
+            cv2.putText(image,f'FPS: {int(fps)}',(20,70),cv2.FONT_HERSHEY_PLAIN,3,(0,255,0),2)
             if not success:
                 print("Ignoring empty camera frame.")
                 break
@@ -115,57 +121,60 @@ def gen_frames(num_of_emos):
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                 if results.detections:
                     for face_no, detection in enumerate(results.detections):
+                        try:
+                            face_bounding = detection.location_data.relative_bounding_box
+                            h = int((face_bounding.height) * image_h)
+                            xmin = int(((face_bounding.xmin) * image_w))
+                            w = int((face_bounding.width) * image_w)
+                            ymin = int(((face_bounding.ymin) *image_h))
 
-                        face_bounding = detection.location_data.relative_bounding_box
-                        h = int((face_bounding.height) * image_h)
-                        xmin = int(((face_bounding.xmin) * image_w)+10)
-                        w = int((face_bounding.width) * image_w)
-                        ymin = int(((face_bounding.ymin) *image_h)+10)
+                            face_for_emo = image[ymin:ymin+h , xmin:xmin+w]
+                            emo = img_ER(face_for_emo,num_of_emos)
 
-                        face_for_emo = image[ymin:ymin+h , xmin:xmin+w]
-                        emo = img_ER(face_for_emo,num_of_emos)
+                            cv2.putText(image,emo,(xmin+int(w/10),ymin-int(h/10)) ,
+                                        cv2.FONT_HERSHEY_SIMPLEX, (face_bounding.width)+0.1 , (0,255,255) ,2+round(face_bounding.width)) 
 
-                        cv2.putText(image,emo,(xmin+int(w/10),ymin+int(h/10)) ,
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.7 , (0,0,255),2)
-
-                        mp_drawing.draw_detection(image, detection)
+#                             mp_drawing.draw_detection(image, detection)
+                            cv2.rectangle(image, (xmin,ymin,w,h),(255,255,0),2+2*round(face_bounding.width + 0.1))
+                        except:
+                            pass
 ######################################################################################################################################
             ret, buffer = cv2.imencode('.jpg', image)
             image = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 ######################################################################################################################################
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                          'favicon.ico')#send_from_directory
+
 @app.route('/')
 def index():
     return render_template('index.html')
-
+#############################################################################################
 
 @app.route('/four_Emos',methods=["GET", "POST"])
 def four_Emos():
     if request.method == "POST":
         if request.form['submit_button'] == "Check your emotion":
-            return (Response(gen_frames(4), mimetype='multipart/x-mixed-replace; boundary=frame'))
-            
+            return render_template('four_Emos.html') 
 
-# @app.route('/two_Emos',methods=["GET", "POST"])
-# def two():
-#     return render_template('two_Emos.html')
-
-
+@app.route('/four_Emos_vid',methods=["GET", "POST"])
+def four_Emos_vid():
+    return (Response(gen_frames(4), mimetype='multipart/x-mixed-replace; boundary=frame'))
+        
+################################################################################################
 @app.route('/two_Emos',methods=["GET", "POST"])
-
 def two_Emos():
     if request.method == "POST":
         if request.form['submit_button'] == "Are you smiling":
-            res = Response(gen_frames(2), mimetype='multipart/x-mixed-replace; boundary=frame')
-            return res
+            return render_template('two_Emos.html')
 
-        
-        
-#             if request.args['type'] == 'json':
-#         return jsonify(summary = data)
-#     else:
-#         return render_template('thankyou.html', summary=data)
+@app.route('/two_Emos_vid',methods=["GET", "POST"])
+def two_Emos_vid():
+    return (Response(gen_frames(2), mimetype='multipart/x-mixed-replace; boundary=frame'))
+
 ######################################################################################################################################
 if __name__=='__main__':
     app.run(debug=True)

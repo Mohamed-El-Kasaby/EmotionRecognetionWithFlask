@@ -1,22 +1,17 @@
 <!DOCTYPE html>
 <html>
-
   <body>
       <center>
     <div class="container">
             <div class="center">
   
-                <txt class="center" style="background-color:powderblue;">I am trying to guess your face emotion but smile ^^</txt>
+                <h1 class="center" style="background-color:powderblue;">I am trying to guess your face emotion but smile ^^</h1>
 
-                <img src="{{ url_for('four_Emos') }}" width="100%">
+                <img src="{{ url_for('four_Emos_vid') }}" width="50%">
                 
                 <form action= "/two_Emos" method="post">
                     <input type="submit" name="submit_button" value="Are you smiling">
                 </form>
-
-            </div>
-        
-            <div>
 
             </div>
     </div>

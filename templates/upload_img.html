@@ -53,12 +53,17 @@
                 </div>
             </nav>
             <center>
-                <h1 style=color:#1AA7EC;> Smiling or not APP </h1>
-                <img src="{{ url_for('two_Emos_vid') }}" width="50%">
-                
-                <form action= "/Home" method="post">
-                    <input type="submit" name="submit_button" value="GO HOME">
-                </form>
+                <h1 style=color:#1AA7EC;> Emotion Recognition using images APP </h1>
+      <form action="/acc_image" method="POST" enctype="multipart/form-data">
+
+          <label style=color:#1AA7EC;>Select image</label>
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" name="image" id="image">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Detect</button>
+
+      </form>
                 </center>
         </section>
       

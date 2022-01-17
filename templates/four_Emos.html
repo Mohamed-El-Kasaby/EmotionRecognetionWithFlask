@@ -1,24 +1,64 @@
 <!DOCTYPE html>
 <html>
-  <body>
-      <center>
-    <div class="container">
-            <div class="center">
-  
-                <h1 class="center" style="background-color:powderblue;">I am trying to guess your face emotion but smile ^^</h1>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+        <link href="/static/styles.css" rel="stylesheet" type="text/css">
+        
+         <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Luxurious+Roman&display=swap" rel="stylesheet"> -->
 
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;600;700&display=swap" rel="stylesheet"> 
+        
+        
+        <link rel="icon" type="image/png" href="/static/Mood_Picture.png">
+
+        <!-- Add icon library -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <title>Facial-Emotion-Recognition</title>
+    </head>
+    <body>
+        <section class="header">
+            <nav>
+                <a href="index.html"> <img src="/static/iti-logo.png"> </a>
+                <div class='nav-links'>
+                    <ul>
+                        <li>              
+                            <form action= '/four_Emos' method="post">
+                                <input type="submit" name="submit_button" value="Check your emotion" style=background:#1AA7EC;>
+                            </form>
+                        </li>
+                        <li>                
+                            <form action= "/two_Emos" method="post" >
+                                <input type="submit" name="submit_button" value="Are you smiling" style=background:#1AA7EC;>
+                            </form>
+                        </li>
+                        <li>                
+                            <form action= "/upload" method="post">
+                                <input type="submit" name="submit_button" value="Upload your image" style=background:#1AA7EC;>
+                            </form>
+                        </li>
+                        <li>                
+                            <form action= "/Home" method="post">
+                                <input type="submit" name="submit_button" value="GO HOME" style=background:#1AA7EC;>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <center>
+                <h1 style=color:#1AA7EC;> Emotion Recognition APP </h1>
                 <img src="{{ url_for('four_Emos_vid') }}" width="50%">
                 
-                <form action= "/two_Emos" method="post">
-                    <input type="submit" name="submit_button" value="Are you smiling">
+                <form action= "/Home" method="post">
+                    <input type="submit" name="submit_button" value="GO HOME">
                 </form>
-
-            </div>
-    </div>
-        </center>
+                </center>
+        </section>
       
-      
-    </body>
-
-
-</html>

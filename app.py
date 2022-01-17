@@ -25,7 +25,7 @@ mp_drawing = mp.solutions.drawing_utils
 #####################################################################################################################################  
 # Prepare class Model
 class ModeL(nn.Module):
-    def __init__(self, n_classes,device= 'cuda'):
+    def __init__(self, n_classes,device= 'cpu'):
 
         super(ModeL, self).__init__()
         self.model = self._creat_Model(n_classes).to(device)  
